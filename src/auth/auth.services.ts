@@ -5,12 +5,14 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Role } from '../common/enums/role.enum';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private auditService: AuditService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -29,11 +31,20 @@ export class AuthService {
       role: Role.USER,
     });
 
+    await this.auditService.log({
+      actorId: user.id,
+      actorRole: Role.USER,
+      action: 'USER_REGISTER',
+      entityType: 'USER',
+      entityId: user.id,
+      metadata: { email: user.email },
+    });
+
     const token = await this.signToken(user.id, user.email, user.role);
     return { user, token };
   }
 
-  async login(dto: LoginDto, ip?: string) {
+  async login(dto: LoginDto, ip?: string, userAgent?: string) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
@@ -41,6 +52,17 @@ export class AuthService {
     if (!match) throw new UnauthorizedException('Invalid credentials');
 
     await this.usersService.updateLoginInfo(user.id, ip);
+
+    await this.auditService.log({
+      actorId: user.id,
+      actorRole: user.role,
+      action: 'USER_LOGIN',
+      entityType: 'USER',
+      entityId: user.id,
+      metadata: { email: user.email },
+      ipAddress: ip ?? null,
+      userAgent: userAgent ?? null,
+    });
 
     const token = await this.signToken(user.id, user.email, user.role);
     return { user, token };

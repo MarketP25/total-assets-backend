@@ -15,6 +15,7 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto, @Req() req: any) {
     const ip = req.ip;
-    return this.authService.login(dto, ip);
+    const userAgent = req.headers['user-agent'] || null;
+    return this.authService.login(dto, ip, userAgent);
   }
 }
