@@ -10,7 +10,15 @@ import { AdminModule } from './admin/admin.module';
 import { AuditModule } from './audit/audit.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, WalletsModule, PlansModule, InvestmentsModule, AdminModule, AuditModule],
+  imports: [
+    UsersModule,
+    AuthModule,
+    WalletsModule,
+    PlansModule,
+    InvestmentsModule,
+    AdminModule,
+    AuditModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

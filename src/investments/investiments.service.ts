@@ -51,9 +51,7 @@ export class InvestmentsService {
     const expectedPayoutAmount = amount * (1 + expectedYieldPercent / 100);
 
     const now = new Date();
-    const endTime = new Date(
-      now.getTime() + plan.durationHours * 3600 * 1000,
-    );
+    const endTime = new Date(now.getTime() + plan.durationHours * 3600 * 1000);
 
     const investment = this.investmentRepo.create({
       userId,

@@ -1,10 +1,4 @@
-import {
-  Controller,
-  UseGuards,
-  Post,
-  Body,
-  Get,
-} from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { InvestmentsService } from './investments.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
@@ -16,10 +10,7 @@ export class InvestmentsController {
   constructor(private readonly investmentsService: InvestmentsService) {}
 
   @Post()
-  create(
-    @User() user: any,
-    @Body() dto: CreateInvestmentDto,
-  ) {
+  create(@User() user: any, @Body() dto: CreateInvestmentDto) {
     return this.investmentsService.create(user.userId, dto);
   }
 
