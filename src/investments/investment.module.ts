@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Investment } from './entities/investment.entity';
-import { InvestmentPlan } from '../plans/entities/investment-plan.entity';
+import { InvestmentPlan } from './plans/entities/investment-plan.entity';
 import { InvestmentsService } from './investment.service';
 import { InvestmentsController } from './investment.controller';
 import { WalletsModule } from '../wallets/wallets.module';

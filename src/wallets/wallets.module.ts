@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { Wallet } from './entities/wallet.entity';
 import { Transaction } from './entities/transaction.entity';
+
 import { WalletsService } from './wallets.service';
 import { WalletsController } from './wallets.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Wallet, Transaction])],
-  providers: [WalletsService],
   controllers: [WalletsController],
-  exports: [WalletsService],
+  providers: [WalletsService],
+  exports: [WalletsService], // so Investments/Trades modules can use wallet logic
 })
 export class WalletsModule {}

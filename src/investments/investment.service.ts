@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual } from 'typeorm';
+import { DataSource, Repository, LessThanOrEqual } from 'typeorm';
 import { Investment } from './entities/investment.entity';
 import { InvestmentPlan } from '../plans/entities/investment-plan.entity';
 import { WalletsService } from '../wallets/wallets.service';
@@ -19,6 +19,7 @@ export class InvestmentsService {
     @InjectRepository(InvestmentPlan)
     private readonly planRepo: Repository<InvestmentPlan>,
     private readonly walletsService: WalletsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(userId: string, dto: CreateInvestmentDto) {
@@ -55,7 +56,7 @@ export class InvestmentsService {
 
     const investment = this.investmentRepo.create({
       userId,
-      planId: plan.id,
+      plan: plan, // Use the relation object directly
       amountInvested: amount.toFixed(2),
       expectedYieldPercent: expectedYieldPercent.toFixed(2),
       expectedPayoutAmount: expectedPayoutAmount.toFixed(2),
@@ -72,7 +73,7 @@ export class InvestmentsService {
     return this.investmentRepo.find({
       where: { userId },
       relations: ['plan'],
-      order: { createdAt: 'DESC' },
+      order: { startTime: 'DESC' },
     });
   }
 

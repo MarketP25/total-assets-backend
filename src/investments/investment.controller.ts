@@ -1,21 +1,18 @@
-import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
-import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
+import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
 import { InvestmentsService } from './investment.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
-import { User } from '../common/decorators/user.decorator;;
+// import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('investments')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class InvestmentsController {
   constructor(private readonly investmentsService: InvestmentsService) {}
 
   @Post()
-  create(@User() user: any, @Body() dto: CreateInvestmentDto) {
-    return this.investmentsService.create(user.userId, dto);
-  }
-
-  @Get()
-  findMyInvestments(@User() user: any) {
-    return this.investmentsService.findForUser(user.userId);
+  create(
+    @Req() req: { user: { id: string } },
+    @Body() dto: CreateInvestmentDto,
+  ) {
+    return this.investmentsService.create(req.user.id, dto);
   }
 }

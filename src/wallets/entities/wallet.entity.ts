@@ -2,37 +2,33 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  JoinColumn,
+  OneToMany,
+  Index,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { Transaction } from './transaction.entity';
 
-@Entity({ name: 'wallets' })
+@Entity()
 export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column({ name: 'user_id' })
+  @Index()
+  @Column()
   userId: string;
 
+  @Index()
   @Column()
-  currency: string; // 'USDT'
+  currency: string; // e.g. 'USDT', 'KES', 'USD', 'BTC'
+
+  @Column({ nullable: true })
+  walletType: string; // e.g. 'INVESTMENT', 'TRADING', 'SAVINGS' – client-defined
 
   @Column({ type: 'decimal', precision: 18, scale: 8, default: 0 })
-  balanceAvailable: string;
+  balance: string; // string to avoid float precision issues
 
-  @Column({ type: 'decimal', precision: 18, scale: 8, default: 0 })
-  balanceLocked: string;
+  @Column({ type: 'json', nullable: true })
+  metadata: any; // for future extensions: provider ids, flags, etc.
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @OneToMany(() => Transaction, (tx) => tx.wallet)
+  transactions: Transaction[];
 }

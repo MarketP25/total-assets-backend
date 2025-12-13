@@ -2,67 +2,62 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
 import { InvestmentPlan } from '../../plans/entities/investment-plan.entity';
 import { InvestmentStatus } from '../../common/enums/investment-status.enum';
 
-@Entity({ name: 'investments' })
+@Entity('investments')
 export class Investment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column({ name: 'user_id' })
+  @Column()
   userId: string;
 
-  @ManyToOne(() => InvestmentPlan)
-  @JoinColumn({ name: 'plan_id' })
-  plan: InvestmentPlan;
-
-  @Column({ name: 'plan_id' })
+  @Column()
   planId: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 2 })
+  @ManyToOne(() => InvestmentPlan)
+  @JoinColumn({ name: 'planId' })
+  plan: InvestmentPlan;
+
+  @Column({ type: 'decimal', precision: 18, scale: 8 })
   amountInvested: string;
 
-  @Column({ type: 'decimal', precision: 6, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 4 })
   expectedYieldPercent: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 2 })
+  @Column({ type: 'decimal', precision: 18, scale: 8 })
   expectedPayoutAmount: string;
 
-  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
-  actualYieldPercent: string | null;
+  @Column({ type: 'decimal', precision: 10, scale: 4, nullable: true })
+  actualYieldPercent: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
-  actualPayoutAmount: string | null;
+  @Column({ type: 'decimal', precision: 18, scale: 8, nullable: true })
+  actualPayoutAmount: string;
 
   @Column({
     type: 'enum',
     enum: InvestmentStatus,
-    default: InvestmentStatus.ACTIVE,
+    default: InvestmentStatus.PENDING,
   })
   status: InvestmentStatus;
 
-  @Column({ nullable: true })
-  fundedTransactionId: string | null;
+  @Column()
+  fundedTransactionId: string;
 
   @Column({ nullable: true })
-  payoutTransactionId: string | null;
+  payoutTransactionId: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  startTime: Date | null;
+  @Column()
+  startTime: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  endTime: Date | null;
+  @Column()
+  endTime: Date;
 
   @CreateDateColumn()
   createdAt: Date;
