@@ -9,7 +9,7 @@ interface CreateAuditLogOptions {
   action: string;
   entityType?: string | null;
   entityId?: string | null;
-  metadata?: any;
+  metadata?: Record<string, any> | null;
   ipAddress?: string | null;
   userAgent?: string | null;
 }
@@ -32,6 +32,7 @@ export class AuditService {
       ipAddress: options.ipAddress ?? null,
       userAgent: options.userAgent ?? null,
     });
+
     return this.auditRepo.save(log);
   }
 }

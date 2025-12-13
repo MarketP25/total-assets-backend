@@ -1,8 +1,8 @@
 import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { InvestmentsService } from './investments.service';
+import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
+import { InvestmentsService } from './investment.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
-import { User } from '../common/decorators/user.decorator';
+import { User } from '../common/decorators/user.decorator;;
 
 @Controller('investments')
 @UseGuards(JwtAuthGuard)
