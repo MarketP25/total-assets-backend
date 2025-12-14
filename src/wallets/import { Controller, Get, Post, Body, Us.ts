@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
-import { Request } from 'express';
 import { WalletsService } from './wallets.service';
-import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { DepositDto } from './dto/deposit.dto';
 import { WithdrawDto } from './dto/withdraw.dto';
 
@@ -12,8 +11,8 @@ export class WalletsController {
   // Get current user's wallet
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMyWallet(@Req() req: Request & { user: { id: string } }) {
-    const wallet = await this.walletsService.getUserWallet(req.user.id, 'USD');
+  async getMyWallet(@Req() req) {
+    const wallet = await this.walletsService.getUserWallet(req.user.id);
     return {
       status: 'success',
       userId: req.user.id,
@@ -24,10 +23,7 @@ export class WalletsController {
   // Deposit funds
   @UseGuards(JwtAuthGuard)
   @Post('deposit')
-  async deposit(
-    @Req() req: Request & { user: { id: string } },
-    @Body() depositDto: DepositDto,
-  ) {
+  async deposit(@Req() req, @Body() depositDto: DepositDto) {
     const transaction = await this.walletsService.deposit(
       req.user.id,
       depositDto.currency,
@@ -39,10 +35,7 @@ export class WalletsController {
   // Request withdrawal
   @UseGuards(JwtAuthGuard)
   @Post('withdraw')
-  async withdraw(
-    @Req() req: Request & { user: { id: string } },
-    @Body() withdrawDto: WithdrawDto,
-  ) {
+  async withdraw(@Req() req, @Body() withdrawDto: WithdrawDto) {
     const transaction = await this.walletsService.requestWithdraw(
       req.user.id,
       withdrawDto.currency,
@@ -54,7 +47,7 @@ export class WalletsController {
   // Get transaction history
   @UseGuards(JwtAuthGuard)
   @Get('history')
-  async getHistory(@Req() req: Request & { user: { id: string } }) {
+  async getHistory(@Req() req) {
     const history = await this.walletsService.getHistory(req.user.id);
     return { status: 'success', history };
   }

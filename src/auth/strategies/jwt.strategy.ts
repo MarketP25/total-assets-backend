@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   // This method is called by Passport after it successfully validates the token.
   // The returned value is attached to the request object as `req.user`.
-  async validate(payload: JwtPayload) {
+  validate(payload: JwtPayload) {
     return { id: payload.sub, email: payload.email, role: payload.role };
   }
 }

@@ -13,11 +13,15 @@ async function bootstrap() {
     }),
   );
 
+  // Allow your Vercel frontend to talk to backend
   app.enableCors({
-    origin: '*',
-    credentials: false,
+    origin: [
+      'https://frontend-1sp9zwrwx-maina-projects.vercel.app', // your live frontend
+    ],
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true, // allow cookies/headers/JWTs
   });
 
   await app.listen(3000);
 }
-bootstrap();
+void bootstrap();
