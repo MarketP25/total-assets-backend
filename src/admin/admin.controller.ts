@@ -1,17 +1,19 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { WalletsService } from '../wallets/wallets.service';
 import { CreditWalletDto } from './dto/credit-wallet.dto';
-// import { RolesGuard } from '../auth/guards/roles.guard';
-// import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
+import { RolesGuard } from '../common/guard/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
 
 @Controller('admin')
-// @UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 export class AdminController {
   constructor(private readonly walletsService: WalletsService) {}
 
   @Post('wallets/credit')
-  // @Roles('admin')
   async creditWallet(@Body() creditDto: CreditWalletDto) {
-    return this.walletsService.creditWalletAdmin(creditDto);
+    return await (this.walletsService as any).creditWalletAdmin(creditDto);
   }
 }

@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Injectable,
   BadRequestException,
@@ -12,10 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionType } from '../common/enums/transaction-type.enum';
-import { TransactionStatus } from '../common/enums/transaction-status.enum';
-import { DepositDto } from './dto/deposit.dto';
-import { WithdrawDto } from './dto/withdraw.dto';
-import { AdminDecisionDto } from './dto/admin-decision.dto';
+import { CreditWalletDto } from '../admin/dto/credit-wallet.dto';
 
 @Injectable()
 export class WalletsService {
@@ -53,9 +46,9 @@ export class WalletsService {
     const wallet = await this.getUserWallet(userId, currency);
     const transaction = this.transactionRepo.create({
       userId,
+      currency,
       type: TransactionType.DEPOSIT,
       status: 'SUCCESS',
-      currency,
       amount: amount.toFixed(2),
       balanceBefore: wallet.balance,
       balanceAfter: (parseFloat(wallet.balance) + amount).toFixed(2),
@@ -74,13 +67,13 @@ export class WalletsService {
     }
     const transaction = this.transactionRepo.create({
       userId,
+      currency,
       type: TransactionType.WITHDRAW,
       status: 'PENDING',
-      currency,
       amount: amount.toFixed(2),
       balanceBefore: wallet.balance,
       balanceAfter: (balance - amount).toFixed(2),
-    } as any);
+    });
     await this.transactionRepo.save(transaction);
     return transaction;
   }
@@ -93,9 +86,9 @@ export class WalletsService {
     }
     const transaction = this.transactionRepo.create({
       userId,
-      type: TransactionType.DEPOSIT,
-      status: TransactionStatus.SUCCESS,
       currency,
+      type: TransactionType.DEPOSIT,
+      status: 'SUCCESS',
       amount: amount.toFixed(2),
       balanceBefore: wallet.balance,
       balanceAfter: (balance - amount).toFixed(2),
@@ -110,9 +103,9 @@ export class WalletsService {
     return this.transactionRepo.find({
       where: {
         type: TransactionType.WITHDRAW,
-        status: TransactionStatus.PENDING,
+        status: 'PENDING',
       },
-      relations: ['user'],
+      relations: ['wallet'],
     });
   }
 
@@ -120,10 +113,10 @@ export class WalletsService {
     const transaction = await this.transactionRepo.findOne({
       where: { id: transactionId },
     });
-    if (!transaction || transaction.status !== TransactionStatus.PENDING) {
+    if (!transaction || transaction.status !== 'PENDING') {
       throw new NotFoundException('Transaction not found or not pending');
     }
-    (transaction as any).status = 'SUCCESS';
+    transaction.status = 'SUCCESS';
     transaction.processedBy = adminId;
     transaction.processedAt = new Date();
     await this.transactionRepo.save(transaction);
@@ -144,12 +137,11 @@ export class WalletsService {
     if (!transaction || transaction.status !== 'PENDING') {
       throw new NotFoundException('Transaction not found or not pending');
     }
-    transaction.status = TransactionStatus.REJECTED;
+    transaction.status = 'REJECTED';
     transaction.processedBy = adminId;
     transaction.processedAt = new Date();
     await this.transactionRepo.save(transaction);
 
-    // Revert balance
     const wallet = await this.getUserWallet(
       transaction.userId,
       transaction.currency,
@@ -159,16 +151,16 @@ export class WalletsService {
     return transaction;
   }
 
-  async creditWalletAdmin(dto: AdminDecisionDto) {
+  async creditWalletAdmin(dto: CreditWalletDto) {
     const wallet = await this.getUserWallet(dto.userId, dto.currency);
-    const amount = parseFloat(dto.amount);
+    const amount = dto.amount;
     const newBalance = parseFloat(wallet.balance) + amount;
     const transaction = this.transactionRepo.create({
       userId: dto.userId,
-      type: TransactionType.DEPOSIT,
-      status: TransactionStatus.SUCCESS,
       currency: dto.currency,
-      amount: dto.amount,
+      type: TransactionType.DEPOSIT,
+      status: 'SUCCESS',
+      amount: amount.toFixed(2),
       balanceBefore: wallet.balance,
       balanceAfter: newBalance.toFixed(2),
     });
@@ -182,9 +174,9 @@ export class WalletsService {
     const wallet = await this.getUserWallet(userId, currency);
     const transaction = this.transactionRepo.create({
       userId,
-      type: TransactionType.WITHDRAW,
-      status: TransactionStatus.SUCCESS,
       currency,
+      type: TransactionType.WITHDRAW,
+      status: 'SUCCESS',
       amount: amount.toFixed(2),
       balanceBefore: wallet.balance,
       balanceAfter: (parseFloat(wallet.balance) + amount).toFixed(2),
